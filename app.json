@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "cashapp",
+    "slug": "cashapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "cashapp",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.souf2001.cashapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.souf2001.cashapp",
+      "runtimeVersion": "1.0.0"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e1251000-c785-4b8f-bc5b-fa0c66d7f075"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e1251000-c785-4b8f-bc5b-fa0c66d7f075"
+    }
+  }
+}
