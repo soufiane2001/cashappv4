@@ -63,7 +63,10 @@ function Home({navigation,route }) {
     const [nom, setNom] = React.useState();
     const [selectenum, setSelectenum] = useState(0);
     const [montant, setmontant] = useState(0);
-     
+    const [thisday, setDay] = useState(0);
+    const [thisweek, setweek] = useState(0);
+    const [yesterday, setYesterday] = useState(0);
+
     const [isModalVisible, setModalVisible] = useState(false);
     const [isModalVisible2, setModalVisible2] = useState(false);
     const [type, setType] = React.useState("");
@@ -135,7 +138,9 @@ function Home({navigation,route }) {
       const fetchItemsFromFirebase =async () => {
   
       const values = await AsyncStorage.getItem('userid');
-        
+      var day=0;    
+      var week=0;  
+      var yesterdayy=0;      
         const docRef = await query(collection(db, "users"),where("id","==",values));
         const querySnapshot=await getDocs(docRef)
         let todos=[]
@@ -171,14 +176,45 @@ function Home({navigation,route }) {
          })
 
 
+         var today = new Date();
+
+         var formattedDate = formatDateToString(today);
+         var currentWeekDates = getCurrentWeekDates();
+         var startDate = currentWeekDates.startDate;
+         var endDate = currentWeekDates.endDate;
+         var yesterdayyy = getYesterdayDate();
+       
+
+
+
          itemData.depense.map((x)=>{
             x.depense.map((y)=>{
               setBudget(budget=>budget-parseFloat(y.montant))  
+             // console.log(y.date)
+              console.log(formattedDate)
+          if(  formattedDate == y.date ){
+            day+=parseFloat(y.montant)
+           
+          }
+          var itemDate = new Date(y.date);
+          if (itemDate >= startDate && itemDate <= endDate) {
+              week += parseFloat(y.montant);
+          }
+          var itemDatee = new Date(y.date);
+        if (itemDatee.toDateString() === yesterdayyy.toDateString()) {
+            yesterdayy += parseInt(y.montant);
+        }
+
             })
+
+          
           
          })
-
-
+        
+         setDay(day)
+         setYesterday(yesterdayy)
+         console.log("week"+week)
+            setweek(week)
 
        
        setload('none')
@@ -191,12 +227,35 @@ function Home({navigation,route }) {
       };
 
 
-
-
-
-  
-
+/******************************************* */
+var      formatDateToString=(date) =>{
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2); // Adding 1 because getMonth() returns zero-based month index
+        var day = ('0' + date.getDate()).slice(-2);
+        return year + '-' + month + '-' + day;
+    }
     
+/******************** */
+function getCurrentWeekDates() {
+  var today = new Date();
+  var dayOfWeek = today.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+  var startDate = new Date(today); // Clone today's date
+  startDate.setDate(startDate.getDate() - dayOfWeek); // Move to Sunday of the current week
+  var endDate = new Date(today); // Clone today's date
+  endDate.setDate(endDate.getDate() + (6 - dayOfWeek)); // Move to Saturday of the current week
+  return { startDate: startDate, endDate: endDate };
+}
+
+
+/**************** */
+function getYesterdayDate() {
+  var today = new Date();
+  var yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  return yesterday;
+}
+
+    /************************* */
  useFocusEffect(
   React.useCallback(() => {
 
@@ -562,7 +621,7 @@ style={{marginTop:'1.5%',width:getResponsiveFontSize(50),height:getResponsiveFon
   <View onPress={() => handlePress(0)} style={{width:'30%',borderWidth:1,borderColor:'#EAEAEA',borderRadius:getResponsiveFontSize(10),height:'90%',display:'flex',alignItems:'center',justifyContent:'center',padding:"2%"}}>
  
 <Text style={{color:'#818181',fontSize:getResponsiveFontSize(14)}}>Ce jour </Text>
-<Text style={{color:'#646464',fontSize:getResponsiveFontSize(14)}}>2 0000,00 DH</Text>
+<Text style={{color:'#646464',fontSize:getResponsiveFontSize(14)}}>{thisday} DH</Text>
 
   </View>
 
@@ -570,7 +629,7 @@ style={{marginTop:'1.5%',width:getResponsiveFontSize(50),height:getResponsiveFon
   <View style={{width:'30%',borderWidth:1,borderColor:'#EAEAEA',borderRadius:getResponsiveFontSize(10),height:'90%',display:'flex',alignItems:'center',justifyContent:'center',padding:"2%"}}>
 
 <Text style={{color:'#818181',fontSize:getResponsiveFontSize(14)}}>Hier </Text>
-<Text style={{color:'#646464',fontSize:getResponsiveFontSize(14)}}>2 0000,00 DH</Text>
+<Text style={{color:'#646464',fontSize:getResponsiveFontSize(14)}}>{yesterday} DH</Text>
  
   </View>
 
@@ -578,7 +637,7 @@ style={{marginTop:'1.5%',width:getResponsiveFontSize(50),height:getResponsiveFon
   <View style={{width:'30%',borderWidth:1,borderColor:'#EAEAEA',borderRadius:getResponsiveFontSize(10),height:'90%',display:'flex',alignItems:'center',justifyContent:'center',padding:"2%"}}>
 
 <Text style={{color:'#818181',fontSize:getResponsiveFontSize(14)}}>Cette Semaine </Text>
-<Text style={{color:'#646464',fontSize:getResponsiveFontSize(14)}}>2 0000,00 DH</Text>
+<Text style={{color:'#646464',fontSize:getResponsiveFontSize(14)}}>{thisweek} DH</Text>
   
   </View>
 

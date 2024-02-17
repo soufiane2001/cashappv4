@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View,TextInput,Button, FlatList ,Image,TouchableOpacity, Alert} from 'react-native';
+import { StyleSheet, Text, View,TextInput,Button, FlatList ,Image,TouchableOpacity, Alert, TouchableWithoutFeedback, Modal} from 'react-native';
 
 import { useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -24,7 +24,22 @@ import { db } from '../../Firebase/FirebaseConfig';
 import { ScrollView } from 'react-native';
 
 
-
+const FullScreenImage = ({ uri, visible, onClose }) => {
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.modalBackground} />
+        </TouchableWithoutFeedback>
+        <Image source={{ uri }} style={styles.image} resizeMode="contain" />
+      </View>
+    </Modal>
+  );
+};
 
 
 
@@ -36,7 +51,11 @@ export default function Scans({navigation ,route}) {
     const [componentWidth, setComponentWidth] = React.useState(0);
     const [recognizedText, setRecognizedText] = useState('');
 
+    const [isFullScreenVisible, setFullScreenVisible] = useState(false);
 
+    const toggleFullScreen = () => {
+      setFullScreenVisible(!isFullScreenVisible);
+    };
 
 
     
@@ -109,7 +128,59 @@ useEffect(()=>{
 
 
 /***********************************88 */
+const [selectedImage, setSelectedImage] = useState(null);
 
+const openImage = (imageUri) => {
+  setSelectedImage(imageUri);
+};
+
+const closeImage = () => {
+  setSelectedImage(null);
+};
+/************************* ********************/
+const [selectedImages, setSelectedImages] = useState([]);
+
+const toggleImageSelection = (index) => {
+  if (selectedImages.includes(index)) {
+    // If image is already selected, deselect it
+    setSelectedImages(selectedImages.filter((i) => i !== index));
+  } else {
+    // If image is not selected, select it
+    setSelectedImages([...selectedImages, index]);
+  }
+};
+
+const handleImageLongPress = (index) => {
+  toggleImageSelection(index);
+};
+
+const handleDeleteSelected = () => {
+  // Implement deletion logic here
+  // For example, you can show an alert for confirmation
+  Alert.alert(
+    'Confirm Deletion',
+    'Are you sure you want to delete the selected images?',
+    [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        onPress: () => deleteSelectedImages(),
+      },
+    ],
+    { cancelable: false }
+  );
+};
+
+const deleteSelectedImages = () => {
+  // Implement deletion logic here
+  console.log('Deleting selected images:', selectedImages);
+  // Clear selected images after deletion
+  setSelectedImages([]);
+};
     return (
      
         <View onLayout={onLayout} style={{backgroundColor:'white',flex:1,paddingHorizontal:"0%",paddingVertical:'0%'}}>
@@ -129,7 +200,7 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
 
        
         <LinearGradient  style={{backgroundColor:'white',paddingHorizontal:"0%",height:'100%',paddingVertical:"0%"}}
-         colors={['#528f76', '#5EC309', '#5CCA00']}
+         colors={['#528f76', '#5EC309', '#15A701']}
        
        >
 <TouchableOpacity style={{marginTop:"5%"}} onPress={()=>{navigation.navigate("Home")}}>
@@ -138,13 +209,14 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
 </TouchableOpacity>
 
 
-<ScrollView contentContainerStyle={{flexGrow:1,paddingVertical:getResponsiveFontSize(0)}}>
+<ScrollView contentContainerStyle={{flexGrow:1,paddingVertical:getResponsiveFontSize(0),marginTop:'4%'}}>
 
-  <View style={{ display:'flex',flexDirection:'row',flexWrap:'wrap',width:'100%',backgroundColor:'white'}}>
+  <View style={{ display:'flex',flexDirection:'row',flexWrap:'wrap',width:'100%'}}>
   {images.length>0 && (
     images.map(((x,key)=>{
         return(  
-    <TouchableOpacity style={{marginLeft:'0%',marginTop:'0%',width:'50%'}} onPress={()=>{navigation.navigate("Scan",{scanid:key})}}>
+          
+    <TouchableOpacity   onLongPress={() =>{ handleImageLongPress(key);console.log(selectedImages.length)}} style={{marginLeft:'0%',marginTop:'0%',width:'50%'}}   onPress={() =>{if(selectedImages.length==0){openImage(x)}}}/* onPress={()=>{navigation.navigate("Scan",{scanid:key})}}*/>
             <Image source={{ uri: x}} style={{ borderWidth:getResponsiveFontSize(0.5),borderColor:'white',width:"100%", height: getResponsiveFontSize(180) }}  />
     </TouchableOpacity>        
             )
@@ -154,6 +226,17 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
 </ScrollView>
 
         </LinearGradient>
+       
+        
+        <Modal visible={!!selectedImage} transparent={true} onRequestClose={closeImage}>
+        <View style={styles.modalContainer}>
+          <TouchableOpacity style={styles.closeButton} onPress={closeImage}>
+            <Text style={styles.closeButtonText}>Close</Text>
+            
+          </TouchableOpacity>
+          <Image source={{ uri: selectedImage }} style={styles.fullscreenImage} resizeMode="contain" />
+        </View>
+      </Modal>
         </View>
       
       )
@@ -161,7 +244,57 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
 }
 
 
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    margin: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    zIndex: 999,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  fullscreenImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageContainer: {
+    padding: 5,
+  },
+  image: {
+    width: 100,
+    height: 100,
+  },
+  selectedImage: {
+    borderWidth: 2,
+    borderColor: 'blue',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 10,
+    alignSelf: 'center',
+    borderRadius: 5,
+    marginTop: 20,
+  },
+});
 
 
 

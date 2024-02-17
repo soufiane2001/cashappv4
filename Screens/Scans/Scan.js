@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View,TextInput,Button, FlatList ,Image,TouchableOpacity, Alert} from 'react-native';
+import { StyleSheet, Text, View,TextInput,Button, FlatList ,Image,TouchableOpacity, Alert, Modal, TouchableWithoutFeedback, Animated} from 'react-native';
 
 import { useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -26,16 +26,37 @@ import { ScrollView } from 'react-native';
 
 
 
+const FullScreenImage = ({ uri, visible, onClose }) => {
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.modalBackground} />
+        </TouchableWithoutFeedback>
+        <Image source={{ uri }} style={styles.image} resizeMode="contain" />
+      </View>
+    </Modal>
+  );
+};
+
 
 
 export default function Scan({navigation ,route}) {
 
     const [imageUri, setImageUri] = useState(null);
     const [imageurl, setImageUrl] = useState(null);
-    const [images, setImages] = useState([]);
+    const [images, setImages] = useState([5]);
     const [componentWidth, setComponentWidth] = React.useState(0);
     const [recognizedText, setRecognizedText] = useState('');
+    const [isFullScreenVisible, setFullScreenVisible] = useState(false);
 
+    const toggleFullScreen = () => {
+      setFullScreenVisible(!isFullScreenVisible);
+    };
 
 
 
@@ -65,7 +86,7 @@ useEffect(()=>{
 
       const [loads, setload] = React.useState("none");
 
-
+      const scale = useState(new Animated.Value(1))[0];
 /**********************************888888 */
   
 
@@ -84,6 +105,7 @@ useEffect(()=>{
               const itemData = doc.data();
               console.log(itemData.factures)
               setImages(itemData.factures)
+          
               setload('none')
          //     console.log(itemData)
                 })
@@ -207,7 +229,15 @@ const remove=async()=>{
 
 
 /***********************************88 */
+const [selectedImage, setSelectedImage] = useState(null);
 
+const openImage = (imageUri) => {
+  setSelectedImage(imageUri);
+};
+
+const closeImage = () => {
+  setSelectedImage(null);
+};
     return (
      
         <View onLayout={onLayout} style={{backgroundColor:'white',flex:1,paddingHorizontal:"0%",paddingVertical:'0%'}}>
@@ -247,31 +277,64 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
 <ScrollView contentContainerStyle={{flexGrow:1,paddingVertical:getResponsiveFontSize(15)}}>
 
   <View style={{ display:'flex',flexDirection:'row',justifyContent:'space-around',flexWrap:'wrap'}}>
-  {images.length>0 && (
-    
-            <Image source={{ uri: images[route.params.scanid]}} style={{ width: "100%", height: getResponsiveFontSize(550) ,resizeMode:'contain'}} />
-        
-            )
+  {//images.length>0 && (
+ 
+ <TouchableOpacity style={{backgroundColor:'red',width:'100%'}} onPress={() => openImage("https://firebasestorage.googleapis.com/v0/b/cashmanagement-c95df.appspot.com/o/01cc5ddc-da18-4f95-afc9-d38bc9026c95?alt=media&token=53912593-00c4-4d46-8dc5-034337bfc1d5")}>
+            <Image source={{ uri: "https://firebasestorage.googleapis.com/v0/b/cashmanagement-c95df.appspot.com/o/01cc5ddc-da18-4f95-afc9-d38bc9026c95?alt=media&token=53912593-00c4-4d46-8dc5-034337bfc1d5"}} style={{ width: "100%", height: getResponsiveFontSize(550) ,resizeMode:'contain'}} />
+</TouchableOpacity>
+       //     )
     } 
   </View>
 </ScrollView>
 
         </LinearGradient>
+      
+        <Modal visible={!!selectedImage} transparent={true} onRequestClose={closeImage}>
+        <View style={styles.modalContainer}>
+          <TouchableOpacity style={styles.closeButton} onPress={closeImage}>
+            <Text style={styles.closeButtonText}>Close</Text>
+            
+          </TouchableOpacity>
+          <Image source={{ uri: selectedImage }} style={styles.fullscreenImage} resizeMode="contain" />
         </View>
+      </Modal>
+    </View>
       
       )
 
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    margin: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    zIndex: 999,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  fullscreenImage: {
+    width: '100%',
+    height: '100%',
+  },
+});

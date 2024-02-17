@@ -47,6 +47,7 @@
     "react-native-calendars": "^1.1301.0",
     "react-native-credit-card-input": "^0.4.1",
     "react-native-datepicker": "^1.7.2",
+    "react-native-lightbox": "^0.8.1",
     "react-native-mlkit-ocr": "^0.3.0",
     "react-native-modal": "^13.0.1",
     "react-native-modal-selector": "^2.1.2",
