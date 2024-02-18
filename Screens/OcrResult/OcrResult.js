@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View,TextInput,Button, FlatList, SafeAreaView, Image, TouchableOpacity, ScrollView ,ActivityIndicator} from 'react-native';
+import { StyleSheet, Text, View,TextInput,Button, FlatList, SafeAreaView, Image, TouchableOpacity, ScrollView ,ActivityIndicator, Animated} from 'react-native';
 import {auth,db} from "../../Firebase/FirebaseConfig"
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -14,9 +14,10 @@ import AwesomeAlert from 'react-native-awesome-alerts';
 import { collection,addDoc, where, getDocs, query, updateDoc } from 'firebase/firestore';
 import ModalSelector from 'react-native-modal-selector';
 import { Calendar } from 'react-native-calendars';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import RNPickerSelect from 'react-native-picker-select';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Easing } from 'react-native';
 
 
 
@@ -26,10 +27,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 function OcrResult({navigation ,route}) {
-
+    var    [btvis, setBtvis] = useState(false);
     const [componentWidth, setComponentWidth] = React.useState(0);
     const [selectedDate, setSelectedDate] = useState(null);
-    const [selectenum, setSelectenum] = useState(0);
+    const [selectenum, setSelectenum] = useState(null);
     
    
 
@@ -185,8 +186,9 @@ function OcrResult({navigation ,route}) {
   
 
   const updateData =async () => {
-setload('block')
 
+if(selectenum!=null){
+  setload('block')
     const today = new Date();
     const year = today.getFullYear().toString();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
@@ -277,6 +279,7 @@ const querySnapshots=await getDocs(q);
         .then(() => {
           
           setload('none')
+         setBtvis(true)
           fetchItemsFromFirebase()
          
         })
@@ -312,9 +315,12 @@ const querySnapshots=await getDocs(q);
 
 
 
+  }
 
-
-
+else{
+  setload('none')
+  alert("Categorie?")
+}
 
 
 
@@ -364,6 +370,41 @@ const handleOptionChange2 = (option) => {
 
 
 const [loads, setload] = React.useState("none");
+const position = useRef(new Animated.Value(0)).current;
+
+useEffect(() => {
+  Animated.loop(
+    Animated.sequence([
+      Animated.timing(position, {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(position, {
+        toValue: 0,
+        duration: 1000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    ])
+  ).start();
+}, []);
+
+
+
+const translateY = position.interpolate({
+  inputRange: [0, 1],
+  outputRange: [0, 2],
+});
+
+const scrollY = useRef(new Animated.Value(0)).current;
+
+const translateYy = scrollY.interpolate({
+  inputRange: [0, 50], // Adjust these values as needed
+  outputRange: [0, 50], // Adjust these values as needed
+  extrapolate: 'clamp'
+});
 
 
 
@@ -377,16 +418,14 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
   <ActivityIndicator size="large" color="#007AFF" />
 </View>
 </View>
-<LinearGradient  style={{backgroundColor:'white',paddingHorizontal:"2%",height:'50%',paddingVertical:"3%",display:'flex',justifyContent:'space-around'}}
+<LinearGradient  style={{backgroundColor:'white',paddingHorizontal:"2%",height:'35%',paddingVertical:"3%",display:'flex',justifyContent:"flex-end"}}
       colors={['#528f76', '#5EC309', '#5CCA00']} >
 
 
 
 
 
-<TouchableOpacity style={{marginTop:"1%"}} onPress={()=>{navigation.navigate("Home")}}>
-<Icon name="home" size={getResponsiveFontSize(29)} color="white" style={{marginLeft:'0%'}}/>
-</TouchableOpacity>
+
 
 <View style={{   ...Platform.select({
                                            ios: {
@@ -443,7 +482,7 @@ style={{marginTop:'1.5%',width:getResponsiveFontSize(40),height:getResponsiveFon
 
 
 
-<View style={{display:"flex",justifyContent:"space-around",width:"100%",height:"50%",paddingHorizontal:"5%",paddingVertical:"10%"}}>
+<View style={{display:"flex",justifyContent:"space-around",width:"100%",height:"58%",paddingHorizontal:"5%",paddingVertical:"10%"}}>
 
 
 
@@ -471,7 +510,7 @@ style={{marginTop:'1.5%',width:getResponsiveFontSize(40),height:getResponsiveFon
                </ModalSelector>
 </View>
 
-               <TouchableOpacity onPress={()=>{updateData()}} style={{marginLeft:"65%",backgroundColor:"red",paddingHorizontal:"3%",paddingVertical:"2%",width:"35%",borderRadius:getResponsiveFontSize(5)}}>
+               <TouchableOpacity disabled={btvis} onPress={()=>{updateData()}} style={{marginLeft:"65%",backgroundColor:"red",paddingHorizontal:"3%",paddingVertical:"2%",width:"35%",borderRadius:getResponsiveFontSize(5)}}>
                     <Text style={{fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'white',textAlign:"center"}} >Enregistrer</Text>
                   </TouchableOpacity>
      
@@ -483,6 +522,36 @@ style={{marginTop:'1.5%',width:getResponsiveFontSize(40),height:getResponsiveFon
 </View>
 
 
+
+
+<LinearGradient  style={{backgroundColor:'white',paddingHorizontal:"2%",height:'7%',display:'flex',justifyContent:'center'}}
+      colors={['#528f76', '#5EC309', '#5CCA00']}
+    
+    >
+       <View style={{paddingHorizontal:'2%',paddingVertical:"0%",paddingLeft:'45%',display:'flex',flexDirection:'row',alignItems:'center',marginTop:'1.5%',justifyContent:'space-between'}}>
+          
+           <Animated.View style={[ {
+
+  }, { transform: [ { translateY }] }]}>
+            <TouchableOpacity onPress={()=>{navigation.navigate("Camera")}}>
+            <Ionicons name="scan"     size={getResponsiveFontSize(32)} color="white" />
+            </TouchableOpacity>
+            </Animated.View>
+            <TouchableOpacity onPress={()=>{navigation.navigate("Statistique")}}>
+            <AntDesign name="areachart" size={getResponsiveFontSize(26)} color="white" />
+            </TouchableOpacity>
+            
+            
+            <TouchableOpacity onPress={()=>{navigation.navigate("Login")}}>
+            <Icon name="home" size={getResponsiveFontSize(35)} color="white" style={{marginLeft:'2.5%'}}/>      
+            </TouchableOpacity>
+            </View>
+
+
+
+
+
+</LinearGradient>
 
 
 

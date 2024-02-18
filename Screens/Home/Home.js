@@ -240,9 +240,13 @@ function getCurrentWeekDates() {
   var today = new Date();
   var dayOfWeek = today.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
   var startDate = new Date(today); // Clone today's date
-  startDate.setDate(startDate.getDate() - dayOfWeek); // Move to Sunday of the current week
-  var endDate = new Date(today); // Clone today's date
-  endDate.setDate(endDate.getDate() + (6 - dayOfWeek)); // Move to Saturday of the current week
+
+  // Move to Monday of the current week
+  startDate.setDate(startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+
+  var endDate = new Date(startDate); // Clone startDate for endDate
+  endDate.setDate(endDate.getDate() + 6); // Move to Sunday of the current week
+
   return { startDate: startDate, endDate: endDate };
 }
 
@@ -255,7 +259,7 @@ function getYesterdayDate() {
   return yesterday;
 }
 
-    /************************* */
+    /**********************************/
  useFocusEffect(
   React.useCallback(() => {
 

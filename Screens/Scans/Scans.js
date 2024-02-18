@@ -228,12 +228,21 @@ const remove=async()=>{
      factures:itemData.factures
   };
    todos.push(item)
-   for(var i=0;i<selectedImages.length;i++){
+ 
+ 
+   
+   //for(var i=0;i<selectedImages.length;i++){
     facturess=item.factures;
-  facturess.splice(selectedImages[i].id, 1);
-   }
-  console.log(facturess)
+    
+    console.log(selectedImages)
+    let selectedIds = selectedImages.map(item => item.id);
+          factureee = facturess.filter((item, index) => !selectedIds.includes(index));
+   // facturess.splice(selectedImages[i].id, 1);
+   //}
+  console.log(factureee)
+
   });
+  
   
   const q = query(collection(db, "users"), where("id", '==',values));
   const querySnapshots=await getDocs(q);
@@ -253,7 +262,7 @@ const remove=async()=>{
           Datenaissance: todos[0].Datenaissance,
           dateinscription:todos[0].dateinscription,
           budgetinitial: todos[0].budgetinitial,
-          factures: facturess
+          factures: factureee
         }
           
           )
@@ -298,7 +307,7 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
 
 
        
-        <LinearGradient  style={{backgroundColor:'white',paddingHorizontal:"0%",height:'100%',paddingVertical:"0%"}}
+        <LinearGradient  style={{paddingHorizontal:"0%",height:'100%',paddingVertical:"0%"}}
          colors={['#528f76', '#5EC309', '#15A701']}
        
        >
@@ -334,7 +343,7 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
     <TouchableOpacity   onLongPress={() =>{ handleImageLongPress(key);console.log(selectedImages.length)}} style={{marginLeft:'0%',marginTop:'0%',width:'50%',opacity:checkExistenceByIndex(selectedImages,key) ? 0.55:1}}   onPress={() =>{if(selectedImages.length==0){openImage(x)}else{
       selectdelete(key)
     }}}/* onPress={()=>{navigation.navigate("Scan",{scanid:key})}}*/>
-            <Image source={{ uri: x}} style={{ borderWidth:getResponsiveFontSize(0.5),borderColor:'white',width:"100%", height: getResponsiveFontSize(180),backgroundColor:'white' }}  />
+            <Image source={{ uri: x}} style={{ borderWidth:getResponsiveFontSize(0.5),borderColor:'white',width:"100%", height: getResponsiveFontSize(180), }}  />
             {selectedImages.includes(key) && (
               <View style={{ position: 'absolute', top: 10, right: 10 }}>
                

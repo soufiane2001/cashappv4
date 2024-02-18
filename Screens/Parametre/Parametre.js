@@ -1,6 +1,6 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View,TextInput,Button, FlatList, SafeAreaView, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View,TextInput,Button, FlatList, SafeAreaView, Image, TouchableOpacity, ScrollView, ActivityIndicator, Animated, Easing } from 'react-native';
 import {auth,db} from "../../Firebase/FirebaseConfig"
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -19,6 +19,7 @@ import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 
 
 function  Parametere({navigation ,route}) {
@@ -730,6 +731,42 @@ const showToast=()=>{
 
 
   const myRef = useRef(null);
+  const position = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(position, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(position, {
+          toValue: 0,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+
+
+  const translateY = position.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 2],
+  });
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const translateYy = scrollY.interpolate({
+    inputRange: [0, 50], // Adjust these values as needed
+    outputRange: [0, 50], // Adjust these values as needed
+    extrapolate: 'clamp'
+  });
+
 
 
 
@@ -778,17 +815,15 @@ const showToast=()=>{
 
 
 
-<View style={{height:'15%',display:'flex',flexDirection:'row',alignItems: 'center',paddingHorizontal:'4%'}}>
+<View style={{height:'15%',display:'flex',flexDirection:'row',alignItems: 'center',justifyContent:"center",paddingHorizontal:'4%'}}>
 
-<TouchableOpacity onPress={()=>{navigation.navigate("Home")}}>
-<Icon name="home" size={getResponsiveFontSize(29)} color="white" style={{marginLeft:'0%'}}/>
-</TouchableOpacity><Text style={{fontSize:getResponsiveFontSize(20),fontFamily:'PoppinsBold',color:'white',marginLeft:'27.5%'}}>Parametre</Text>
+<Text style={{fontSize:getResponsiveFontSize(20),fontFamily:'PoppinsBold',color:'white',marginLeft:'0.5%'}}>Parametre</Text>
 
 </View>
 
 
 
-<View style={{display:'flex',flexDirection:'row',flexWrap:'wrap',width:'100%',justifyContent:'space-around',alignItems:'center',backgroundColor:'white',height:'85%',padding:'5%',borderTopLeftRadius: getResponsiveFontSize(55),borderTopRightRadius:getResponsiveFontSize(55)}}>
+<View style={{display:'flex',flexDirection:'row',flexWrap:'wrap',width:'100%',justifyContent:'space-around',alignItems:'center',backgroundColor:'white',height:'78%',padding:'5%',borderTopLeftRadius: getResponsiveFontSize(55),borderTopRightRadius:getResponsiveFontSize(55)}}>
 
 
 <TouchableOpacity onPress={()=>{navigation.navigate("Profile")}} style={{height:"20%",borderRadius:getResponsiveFontSize(30),width:getResponsiveFontSize(150),backgroundColor:'white',...Platform.select({
@@ -856,523 +891,43 @@ const showToast=()=>{
 <Text style={{marginBottom:"20%",fontSize:getResponsiveFontSize(17),fontFamily:"PoppinsRegular"}}>politique general</Text>
 </TouchableOpacity>
 
-{/**
-<Text style={{fontSize:getResponsiveFontSize(17),fontFamily:'PoppinsSemiBold',color:'black',textAlign:'center'}}>Tout vos informations</Text>
 
 
 
-<ScrollView contentContainerStyle={{flexGrow:1,paddingVertical:getResponsiveFontSize(25)}}>
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<Text style={{fontSize:getResponsiveFontSize(15),fontFamily:'PoppinsMedium',color:'#606060',marginLeft:'6.5%',marginTop:'4%'}}>informations personnelles :</Text>
-
-<TextInput 
-                onChangeText={setNom}
-                value={nom}
-                style={{width:'90%',padding:"0%", borderColor:'#F0F0F0',paddingVertical:'2.4%',paddingLeft:'5%',borderRadius:15,marginTop:'4%',backgroundColor:'#F3F3FC',marginLeft:'5%',fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'#484948', }}
-                placeholder="Nom"
-                placeholderTextColor="#BCBCBC" 
-                />
-
-
-
-               <TextInput 
-                  onChangeText={setPrenom}
-                  value={prenom}
-                  style={{width:'90%',padding:"0%", borderColor:'#F0F0F0',paddingVertical:'2.4%',paddingLeft:'5%',borderRadius:15,marginTop:'7%',backgroundColor:'#F3F3FC',marginLeft:'5%',fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'#484948',    }}
-                  placeholder="Prenom"
-                  placeholderTextColor="#BCBCBC" 
-                  />
-
-
-
-<TextInput 
-                  onChangeText={setCity}
-                  value={city}
-                  style={{width:'90%',padding:"0%", borderColor:'#F0F0F0',paddingVertical:'2.4%',paddingLeft:'5%',borderRadius:15,marginTop:'7%',backgroundColor:'#F3F3FC',marginLeft:'5%',fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'#484948',    }}
-                  placeholder="Ville"
-                  placeholderTextColor="#BCBCBC" 
-                  />
-
-
-<TextInput 
-                  onChangeText={setTel}
-                  value={telephone}
-                  keyboardType="numeric"
-                  style={{width:'90%',padding:"0%", borderColor:'#F0F0F0',paddingVertical:'2.4%',paddingLeft:'5%',borderRadius:15,marginTop:'7%',backgroundColor:'#F3F3FC',marginLeft:'5%',fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'#484948',    }}
-                  placeholder="telephone"
-                  placeholderTextColor="#BCBCBC" 
-                  />
-
-
-        
-         
-         
-                  
-
-
-
-
-
-
-
-               <ModalSelector
-                   data={secteurs}
-                   initValue="Select Genre"
-                   onChange={handleOptionChange3}
-                   style={{marginTop:'7%',backgroundColor:'#F3F3FC',width:'90%',paddingVertical:'2.4%',paddingLeft:'5%',marginTop:"5%",marginLeft:'5%',borderWidth:1,borderColor:'#F7F7F7',borderRadius:30}}
-                 >
-      
-      
-                  <TouchableOpacity>
-                      <Text style={{fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'#BCBCBC'}} >{secteur || 'Secteur d’activité' }</Text>
-                  </TouchableOpacity>
-     
-     
-                </ModalSelector>
-
-
-
-                
-
-
-
-
-
-
-
-
-              <ModalSelector
-                 data={fonctions}
-                 initValue="Select Genre"
-                 onChange={handleOptionChange2}
-                 style={{marginTop:'7%',backgroundColor:'#F3F3FC',width:'90%',paddingVertical:'2.4%',paddingLeft:'5%',marginTop:"5%",marginLeft:'5%',borderWidth:1,borderColor:'#F7F7F7',borderRadius:30}}
-                >
-       
-                  <TouchableOpacity>
-                    <Text style={{fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'#BCBCBC'}} >{fonction || 'Fonction' }</Text>
-                  </TouchableOpacity>
-     
-               </ModalSelector>
-
-
-
-
-
-
-
-
-
-
-
-
-          <TouchableOpacity onPress={toggleCalendar}>
-               <View style={{display:'flex',flexDirection:'row',alignItems:'center',marginTop:'7%',backgroundColor:'#F3F3FC',width:'90%',paddingVertical:'2.4%',paddingLeft:'5%',marginTop:"5%",marginLeft:'5%',borderWidth:1,borderColor:'#F7F7F7',borderRadius:30}}>
-                    <Text style={{fontSize:getResponsiveFontSize(14),fontFamily:"PoppinsRegular",color:'#BCBCBC'}}>{Calendrier || 'Datenaissance'}</Text>
-     
-                    <Icon name="calendar" size={24} color="black" style={{marginLeft:'55%'}}/>
-              <View style={{position:'absolute',left:'7%',top:'-945%',backgroundColor:'#F3F1F1',width:'90%'}}>
-                  
-                  {isCalendarVisible && (
-                 <DateTimePicker
-                 testID="dateTimePicker"
-                 value={Calendrier.length<1 ? new Date() : datehelp}
-                 mode="date" // "date" for a date picker, "time" for a time picker
-                 is24Hour={true}
-                 display="spinner" // "default" or "spinner"
-                 onChange={onChange}
+</View>
+<LinearGradient  style={{backgroundColor:'white',paddingHorizontal:"2%",height:'7%',display:'flex',justifyContent:'center'}}
+      colors={['#528f76', '#5EC309', '#5CCA00']}
     
-               />
-                    )}
-      
-      
-              </View>
-             </View>
-
-
-           </TouchableOpacity>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <Text style={{fontSize:getResponsiveFontSize(15),fontFamily:'PoppinsMedium',color:'#606060',marginLeft:'6.5%',marginTop:'10%'}}>Budget :</Text>
-
-
-
-
-
-
-
-
-<View style={styles.container}>
-
-
-<Modal visible={isModalInitial} animationIn="slideInUp" animationOut="slideOutDown">
-   <View style={styles.modal}>
-     <Text style={styles.modalTitle}>Epargne Actuelle</Text>
-     
-     <TextInput
-           style={styles.textInput}
-           placeholder="1000"
-           keyboardType="numeric"
-           value={budgetinitial}
-           onChangeText={setbudgetinitial}
-
-         />
-
-
-     <View style={styles.buttonContainer}>
-      <Button title="enregistrer" onPress={Savebudgetinitial} color="#007BFF" />
-      <Button title="fermer" onPress={togglebudgetinitial} color="#FF6347" />
-     </View>
-    </View>
-</Modal>
-
-</View>
-
-
-
-
-
-  <View style={styles.container}>
-
-
-<Modal visible={isModalbudged} animationIn="slideInUp" animationOut="slideOutDown">
-   <View style={styles.modal}>
-     <Text style={styles.modalTitle}>Entrez le jour du moi</Text>
-       <RNPickerSelect
-          value={selectedDate}
-          onValueChange={(value) => setSelectedDate(value)}
-          items={numberOptions}
-          style={pickerSelectStyles}
-         />
-
-
-     <View style={styles.buttonContainer}>
-      <Button title="enregistrer" onPress={Savebudgetd} color="#007BFF" />
-      <Button title="fermer" onPress={toggleBudgetd} color="#FF6347" />
-     </View>
-    </View>
-</Modal>
-
-</View>
-
-
-
-
-
-
-<Modal visible={isModalbudgem} animationIn="slideInUp" animationOut="slideOutDown">
-
-
- <View style={styles.modal}>
-      
-         <Text style={styles.modalTitle}>Entrez le montants </Text>
-
-        <TextInput
-           style={styles.textInput}
-           placeholder="1000"
-           value={selectedBudgetm}
-           keyboardType="numeric"
-           onChangeText={setSelectedBudgetm}
-
-         />
-
-
-
-  <View style={styles.buttonContainer}>
-       <Button title="enregistrer" onPress={()=>{Savebudgetm()}} color="#007BFF" />
-        <Button title="fermer" onPress={()=>{toggleBudgetm() }} color="#FF6347" />
-   </View>
- </View>
-
-
-</Modal>
-
-
-
-
-
-
-
-
-
-
-
-
-<Modal visible={isModaldepense} animationIn="slideInUp" animationOut="slideOutDown">
-
-
- <View style={styles.modal}>
-      
-         <Text style={styles.modalTitle}>Modifier le montant </Text>
-
-        <TextInput
-           style={styles.textInput}
-           placeholder="1000"
-           keyboardType="numeric"
-           value={selectedDepensem}
-           onChangeText={setSelectedDepensem}
-
-         />
-
-
-
-  <View style={styles.buttonContainer}>
-       <Button title="enregistrer" onPress={()=>{Savedepense()}} color="#007BFF" />
-        <Button title="fermer" onPress={()=>{toggledepense() }} color="#FF6347" />
-   </View>
- </View>
-
-
-</Modal>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{budgets.length>0 && budgets.map((x,index)=>
-
-<View key={index}  style={{backgroundColor:'white',paddingHorizontal:'0%',paddingVertical:'5.5%',borderRadius:15,borderWidth:1,borderColor:'#F7F7F7',marginTop:'4%',
-display:'flex',flexDirection:'row',justifyContent:'space-around',alignItems:'center',width:'93%',marginLeft:'3.2%',
-...Platform.select({
-                 ios: {
-                        shadowColor: 'black',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 2,
-                         },
-                   android: {
-                                elevation:5,
-                   },})
-
-}}>
-
-<Image source={{uri:x.icon}} style={{width:"18%",height:'85%',marginBottom:'2%',resizeMode:'contain',borderRadius:50}} />
-
-
-
-<Text style={{width:'40%',fontSize:getResponsiveFontSize(13),fontFamily:'PoppinsMedium',color:'black',textAlign:'center',marginLeft:'0%'}}>{x.type}</Text>
-
-
-<TouchableOpacity onPress={()=>{toggleBudgetm(index)}}  style={{backgroundColor:'#4816FF',width:'29%',color:'white',paddingHorizontal:'1%',borderRadius:12,
-   alignSelf:'flex-start',marginRight:'4%',marginTop:'2%',display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center'
-     }}>
-
-
-
-<Text style={{fontSize:getResponsiveFontSize(14),fontFamily:'PoppinsMedium',color:'white',textAlign:'center',display:'flex',marginTop:'2%'}}>{x.revenu} dh</Text></TouchableOpacity>
-
-
-
-</View>
-
-
-
-)}
-
-
-
-
-
-
-
-    
-
-
-
-<Text style={{fontSize:getResponsiveFontSize(15),fontFamily:'PoppinsMedium',color:'#606060',marginLeft:'6.5%',marginTop:'13%'}}>Depense :</Text>
-
-
-    {depense.length>0 && depense.map((x,index)=>
-
-
-
-<View key={index}  style={{backgroundColor:'white',paddingHorizontal:'1%',paddingVertical:'5.5%',borderRadius:15,borderWidth:1,borderColor:'#E5E5E7',marginTop:'4%',
-  display:'flex',flexDirection:'row',justifyContent:'space-between',alignItems:'center',width:'93%',marginLeft:'3.8%',
-...Platform.select({
-  ios: {
-    shadowColor: 'black',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  android: {
-    elevation:3,
-  },})
-,marginBottom:'2%'
-}}>
-
-<Image source={{uri:x.photo}} style={{width:"19%",height:'85%',marginBottom:'2%',resizeMode:'contain',borderRadius:50}} />
-  <Text style={{width:'30%',fontSize:getResponsiveFontSize(13),fontFamily:'PoppinsMedium',color:'black',textAlign:'center',marginLeft:'0%'}}>{x.type}</Text>
-
-
-<View style={{
-backgroundColor:'#4816FF',width:'21%',color:'white',paddingHorizontal:'3%',paddingVertical:'0.35%',borderRadius:12,
-alignSelf:'flex-start',marginTop:'2%',marginLeft:'-2%'
-}}>
-  <Text style={{fontSize:getResponsiveFontSize(13),fontFamily:'PoppinsMedium',color:'white',textAlign:'center',
-}}>{x.montant}dh</Text>
-</View>
-
-
-
-
-
-<TouchableOpacity onPress={()=>{toggledepense(index)}} style={{
-backgroundColor:'#40DC01',color:'white',paddingHorizontal:'2.5%',paddingVertical:'1%',borderRadius:10,display:'flex',flexDirection:'row',
-alignItems:'center',alignSelf:'flex-start',marginTop:'2%',
-}}>
-  <Text style={{fontSize:getResponsiveFontSize(12),fontFamily:'PoppinsMedium',color:'white',textAlign:'center',
-}}>Montant</Text>
-
-</TouchableOpacity>
-
-  </View>
-
-
-
-
-
-
-
-
-
-
-)}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <TouchableOpacity onPress={()=>{updateItemsFromFirebase()}}  style={{width:"25%",marginTop:'8%',marginLeft:'70%',backgroundColor:'#4A83FE',paddingHorizontal:'2%',paddingVertical:'2%',marginBottom:"3%",borderRadius:25}}>
-         <Text style={{fontSize:getResponsiveFontSize(15),textAlign:'center',color:'white',fontFamily:'PoppinsRegular'}}>Modifier</Text>
-</TouchableOpacity>
-
-
-</ScrollView>        
-*/}
-
-
-
-
-
-</View>
-
+    >
+       <View style={{paddingHorizontal:'2%',paddingVertical:"0%",paddingLeft:'45%',display:'flex',flexDirection:'row',alignItems:'center',marginTop:'1.5%',justifyContent:'space-between'}}>
+          
+           <Animated.View style={[ {
+
+  }, { transform: [ { translateY }] }]}>
+            <TouchableOpacity onPress={()=>{navigation.navigate("Camera")}}>
+            <Ionicons name="scan"     size={getResponsiveFontSize(32)} color="white" />
+            </TouchableOpacity>
+            </Animated.View>
+            <TouchableOpacity onPress={()=>{navigation.navigate("Statistique")}}>
+            <AntDesign name="areachart" size={getResponsiveFontSize(26)} color="white" />
+            </TouchableOpacity>
+            
+            
+            <TouchableOpacity onPress={()=>{navigation.navigate("Login")}}>
+            <Icon name="home" size={getResponsiveFontSize(35)} color="white" style={{marginLeft:'2.5%'}}/>      
+            </TouchableOpacity>
+            </View>
+
+
+
+
+
+</LinearGradient>
 
 
 

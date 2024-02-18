@@ -206,10 +206,64 @@ if (status == 'granted') {
 
     
     const recognizeText = async (x) => {
-    
-      setload('block')
+    /********************************** */
 
-      const url = 'https://ocr-extract-text.p.rapidapi.com/ocr?url='+x;
+    const apiKey = '19cad4ed-cdf9-11ee-9bf1-4e9f577ac06c'; // Replace with your Nanonets API key
+    const nanonetsModelId = '00f6aaea-aa30-4e0c-a3d7-ce854ba10856'; // Replace with your Nanonets model ID
+    const nanonetsApiEndpoint = `https://app.nanonets.com/api/v2/OCR/Model/${nanonetsModelId}/LabelFile/`;
+
+    const formData = new FormData();
+        formData.append('file', {
+            uri: x,
+            type: 'image/jpeg', // Adjust the type according to your image format
+            name: 'invoice.jpg', // Adjust the name according to your image file name
+        });
+
+    try {
+        const response = await fetch(nanonetsApiEndpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${btoa(apiKey + ':')}`,
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to extract price from invoice. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        // Parse the response to extract the price information
+        const price = data.result[0].prediction;
+        const filteredData = price.filter(item => item.label === 'invoice_amount');
+
+        console.log(filteredData);
+        if(filteredData.length>0){
+        navigation.navigate('OcrResult',{prix:parseFloat(filteredData[0].ocr_text)})
+}
+else{
+ 
+  alert("aucun prix detecte")
+
+
+}
+setload('none')       
+    } catch (error) {
+      setload('none')
+        console.error('Error extracting price from invoice:', error);
+    }
+
+
+    /******************************************** */
+    
+    
+    
+    
+    
+    
+
+
+     /* const url = 'https://ocr-extract-text.p.rapidapi.com/ocr?url='+x;
       const options = {
         method: 'GET',
         url: 'https://ocr-extract-text.p.rapidapi.com/ocr',
@@ -226,7 +280,7 @@ if (status == 'granted') {
         const response = await fetch(url, options);
         const result = await response.json();
         console.log("//////////////////////////");
-        console.log(result);
+        //console.log(result);
         var resultArray = result.text.split("\n");
         // console.log(resultArray);
         // const outputArray =resultArray.map(str => parseFloat(str.replace(/[^\d.]/g, '')));
@@ -236,7 +290,7 @@ if (status == 'granted') {
          // const decimalPart = (value.toString().split('.')[1] || '').length;
          // return decimalPart < 2;
         //});
-       console.log(result.text);
+     //  console.log(result.text);
 const prix = result.text.match(/\b\d+\.\d+\b/g);
       console.log("Les prix trouvés sont :", prix);
       var largestNumber=null;
@@ -244,7 +298,7 @@ const prix = result.text.match(/\b\d+\.\d+\b/g);
       var prixFloats = prix.map(parseFloat);
       
         var largestNumber = findLargestNumber(prixFloats);
-        console.log(largestNumber)
+       // console.log(largestNumber)
      }
         if(prix!=null || largestNumber!=null){
           setload('none')
