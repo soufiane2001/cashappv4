@@ -2,7 +2,7 @@ import React, { useEffect,useRef } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View,TextInput,Button, FlatList, SafeAreaView, Image, TouchableOpacity, ScrollView, ActivityIndicator,Animated, Easing } from 'react-native';
 
-
+import * as shape from 'd3-shape';
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import {db} from "../../Firebase/FirebaseConfig"
@@ -19,6 +19,11 @@ import Modal from 'react-native-modal';
 import { collection,addDoc, where, getDocs, query, updateDoc } from 'firebase/firestore';
 import { BarChart, XAxis, YAxis } from 'react-native-svg-charts';
 import { Defs, Stop,LinearGradient } from 'react-native-svg';
+import { Circle } from 'react-native-svg';
+import Svg from 'react-native-svg';
+import { G } from 'react-native-svg';
+import { Line } from 'react-native-svg';
+import { LineChart } from 'react-native-chart-kit';
 
 
 
@@ -526,12 +531,44 @@ mnt=0;
 
    // setSommedepense3(x=>x+mnt)
    yearo.push({date:new Date(dateyeer[i]).getFullYear(),montant:mnt})
+  // annees_courts.push(new Date(dateyeer[i]).getFullYear())
   // console.log(mnt)
   // console.log(new Date(dateyeer[i]).getFullYear()) 
 
   }
   console.log(yearo) 
- setstatistique3(yearo)
+  console.log("====================") 
+
+
+ const chartData = yearo.map(item => ({ x: item.date, y: item.montant }));
+
+
+
+// Combine dates and montants into one variable for the LineChart component
+
+const dates = yearo.map(item => item.date.toString()); // Convert to string
+const montants = yearo.map(item => item.montant);
+const datass = {
+  labels: ['2024', '2023'],
+  datasets: [
+    {
+      data: [489, 1489]
+    }
+  ]
+}
+// Constructing the datas object
+const datasss = {
+  labels: dates,
+  datasets: [
+    {
+      data: montants
+    }
+  ]
+};
+console.log(datasss)
+setDatal(datasss)
+setstatistique3(chartData)
+
 
 })
 
@@ -666,11 +703,23 @@ else{
 
 
 
+        const tester = {
+          labels: ['2024', '2023'],
+          datasets: [
+            {
+              data: [489, 1489]
+            }
+          ]
+        }
 
 
 
-
-
+        const yearsstats = [
+          { "date": 2024, "montant": 489 },
+          { "date": 2023, "montant": 1489 }
+        ];
+      
+        const chartDatas = yearsstats.map(item => ({ value: item.montant,date: item.date }));
 
 
 
@@ -687,6 +736,7 @@ else{
 
 
         const mois_courts = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"];
+        const annees_courts = [];
   
   
 const formatDate=(inputDate)=> {
@@ -712,6 +762,9 @@ const data = [
   
   
 ];
+
+
+var [datal,setDatal]=useState(null);
 
 const Gradient = () => (
   <Defs key={'gradient'}>
@@ -904,7 +957,7 @@ display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'center',h
 
 
 statistique.length > 0 && statistique.map((x,key)=>{
-if(key<(statistique.length-1))
+if(key<(statistique.length))
 
   return(
 
@@ -966,15 +1019,15 @@ statistique2.length > 0 && (
     {  statistique2.reverse().map((x,key)=>{
   return(
     <>
-    <Text style={{fontSize:getResponsiveFontSize(18.5),textAlign:'center',fontFamily:"PoppinsRegular",color:'#DA4521',marginTop:'8%'}}>{x.year}</Text>
+    <Text style={{fontSize:getResponsiveFontSize(15.5),textAlign:'center',fontFamily:"PoppinsRegular",color:'#DA4521',marginTop:'8%'}}>{x.year}</Text>
 <Animated.View style={{display:'block',opacity: fadeAnim,flexDirection: 'row',height:getResponsiveFontSize(400),width:"98%",marginTop:'5%'}} >
 <YAxis
   data={x.stock.map(item => item.montant)}
   contentInset={{ top: 10, bottom: 20 }}
-  svg={{ fill: 'grey', fontSize: getResponsiveFontSize(12) }}
+  svg={{ fill: 'grey', fontSize: getResponsiveFontSize(10) }}
   numberOfTicks={5}
 />
-<View style={{ flex: 1, marginLeft: 15 }}>
+<View style={{ flex: 1, marginLeft: 10 }}>
   <BarChart
     style={{ flex: 1 }}
     data={x.stock.map(item => item.montant)}
@@ -984,11 +1037,11 @@ statistique2.length > 0 && (
     <Gradient />
   </BarChart>
   <XAxis
-            style={{ marginHorizontal: 2,marginVertical:5 }}
+            style={{ marginHorizontal: 2,marginVertical:6 }}
             data={x.stock.map((_, index) => index)}
             formatLabel={(value, index) => mois_courts[x.stock[index].mois]}
-            contentInset={{ left:getResponsiveFontSize(9), right: getResponsiveFontSize(9) }}
-            svg={{ fontSize: getResponsiveFontSize(), fill: 'black' }}
+            contentInset={{ left:getResponsiveFontSize(6), right: getResponsiveFontSize(9) }}
+            svg={{ fontSize: getResponsiveFontSize(8), fill: 'black' }}
           />
 </View>
 </Animated.View>
@@ -1011,6 +1064,79 @@ statistique2.length > 0 && (
 
 
 
+
+
+
+
+{
+datal!=null  && (
+
+    
+    <View style={{display:'block'}}>
+      <LineChart
+        data={datal}
+      
+        width={getResponsiveFontSize(350)}
+        height={getResponsiveFontSize(400)}
+        yAxisSuffix=""
+        yAxisInterval={1} // Optional, defines interval between labels
+        chartConfig={{
+          backgroundColor: '#ffffff',
+          backgroundGradientFrom: '#ffffff',
+          backgroundGradientTo: '#ffffff',
+          decimalPlaces: 0, // Optional, number of decimal places for labels
+          color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Line color
+          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Label color
+          style: {
+            borderRadius: 16
+          },
+          propsForDots: {
+            r: '1',
+            strokeWidth: '5',
+            stroke: '#ffa726'
+          }
+        }}
+        bezier // Set to false to disable bezier lines
+      />
+    {  /*statistique3.reverse().map((x,key)=>{
+  return(
+    <>
+    <Text style={{fontSize:getResponsiveFontSize(15.5),textAlign:'center',fontFamily:"PoppinsRegular",color:'#DA4521',marginTop:'8%'}}>{x.year}</Text>
+<Animated.View style={{display:'block',opacity: fadeAnim,flexDirection: 'row',height:getResponsiveFontSize(400),width:"98%",marginTop:'5%'}} >
+
+<YAxis
+          data={chartDatas}
+          contentInset={{ top: 20, bottom: 20 }}
+          svg={{ fill: 'grey', fontSize: 10 }}
+          numberOfTicks={5}
+          formatLabel={value => `${value}`}
+        />
+        <View style={{ flex: 1, marginLeft: 10 }}>
+          <LineChart
+            style={{ flex: 1 }}
+            data={chartDatas}
+            svg={{ stroke: 'rgb(134, 65, 244)' }}
+            contentInset={{ top: 20, bottom: 20 }}
+            curve={shape.curveNatural}
+          />
+          <BarChart
+            style={{ position: 'absolute', width: '100%', height: '100%' }}
+            data={chartDatas}
+            svg={{ fill: 'rgba(134, 65, 244, 0.8)' }}
+            contentInset={{ top: 20, bottom: 20 }}
+            yAccessor={({ item }) => item.y}
+            animate={true}
+          />
+         
+        </View>
+
+</Animated.View>
+ </> /*)
+})*/
+}
+</View>
+)
+}
 
 
 
@@ -1083,3 +1209,6 @@ const styles = StyleSheet.create({
   },
 });
 export default Statistique
+
+
+
